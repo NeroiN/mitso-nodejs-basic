@@ -1,30 +1,28 @@
-import fs from 'fs/promises';
-import path from 'path';
-const read = async () => {
-    
-    // Имя файла для чтения и путь к файлу
-    const fileName = 'fileToRead.txt';
-    const filePath = path.join(__dirname, 'src/streams/files', fileName);
-    
-    // Создаем Readable Stream
-    const readableStream = fs.readableStream(filePath, { encoding: 'utf8' });
-    
-    // Устанавливаем обработчик события 'data' для чтения данных из потока
-    readableStream.on('data', (chunk) => {
-      // Печатаем содержимое в process.stdout
-      process.stdout.write(chunk);
+import fs from 'fs';
+
+const readAndPrintFile = async () => {
+    const filePath = 'src/streams/files/fileToRead.txt';
+    const fileStream = fs.createReadStream(filePath);
+
+    return new Promise((resolve, reject) => {
+        fileStream.on('data', (chunk) => {
+            process.stdout.write(chunk);
+        });
+
+        fileStream.on('end', () => {
+            resolve();
+        });
+
+        fileStream.on('error', (error) => {
+            reject(error);
+        });
     });
-    
-    // Устанавливаем обработчик события 'end' для завершения потока
-    readableStream.on('end', () => {
-      console.log('\nЧтение завершено');
-    });
-    
-    // Устанавливаем обработчик события 'error' для обработки ошибок
-    readableStream.on('error', (err) => {
-      console.error(`Ошибка при чтении файла: ${err.message}`);
-    });
-    
 };
 
-await read();
+(async () => {
+    try {
+        await readAndPrintFile();
+    } catch (error) {
+        console.error('An error occurred:', error);
+    }
+})();
